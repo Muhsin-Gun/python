@@ -10,17 +10,26 @@ from datetime import datetime, timedelta
 import json
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'trading-ai-secret-key-2024')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///trading.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_pre_ping': True,
-    'pool_recycle': 300,
-}
+
+# Load configuration
+try:
+    from config import Config
+    app.config.from_object(Config)
+except ImportError:
+    # Fallback to default SQLite configuration
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'trading-ai-secret-key-2024')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///trading.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
 
 CORS(app)
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+
+print(f"Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 from models import Trade, Signal, BacktestResult, MarketData, UserSettings
 from trading_engine import TradingEngine
@@ -174,4 +183,10 @@ def handle_live_narration(data):
     })
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\n{'='*60}")
+    print(f"Starting Trading AI Server")
+    print(f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    print(f"Server: http://localhost:{port}")
+    print(f"{'='*60}\n")
+    socketio.run(app, host='0.0.0.0', port=port, debug=False)

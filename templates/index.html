@@ -243,7 +243,14 @@
 
         <aside class="right-panel">
             <div class="panel-section">
-                <h3>Live Narration</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="margin-bottom: 0;">Live Narration</h3>
+                    <button class="collapse-btn" id="collapseNarration" title="Collapse/Expand">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </button>
+                </div>
                 <div class="narration-box" id="narrationBox">
                     <p class="narration-placeholder">Click "Live Narration" to start real-time market commentary</p>
                 </div>

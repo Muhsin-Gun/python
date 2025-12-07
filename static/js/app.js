@@ -67,6 +67,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('signalModal').classList.remove('active');
     });
 
+    // Collapse/Expand narration
+    document.getElementById('collapseNarration').addEventListener('click', function() {
+        const narrationBox = document.getElementById('narrationBox');
+        const btn = this;
+        
+        narrationBox.classList.toggle('collapsed');
+        btn.classList.toggle('collapsed');
+    });
+
     function initChart() {
         const ctx = document.getElementById('priceChart').getContext('2d');
         priceChart = new Chart(ctx, {
