@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Trading AI - Advanced Market Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Trading AI</h1>
+                    <span>Intelligent Market Analysis</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+                <div class="time-display" id="timeDisplay"></div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>Market Selection</h3>
+                    <select id="symbolSelect" class="select-input">
+                        <option value="EUR/USD">EUR/USD - Euro/Dollar</option>
+                        <option value="GBP/USD">GBP/USD - Pound/Dollar</option>
+                        <option value="USD/JPY">USD/JPY - Dollar/Yen</option>
+                        <option value="XAU/USD">XAU/USD - Gold</option>
+                        <option value="AUD/USD">AUD/USD - Aussie/Dollar</option>
+                        <option value="EUR/GBP">EUR/GBP - Euro/Pound</option>
+                        <option value="GBP/JPY">GBP/JPY - Pound/Yen</option>
+                        <option value="BTC/USD">BTC/USD - Bitcoin</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Timeframe</h3>
+                    <div class="timeframe-buttons">
+                        <button class="tf-btn" data-tf="1m">1M</button>
+                        <button class="tf-btn" data-tf="5m">5M</button>
+                        <button class="tf-btn" data-tf="15m">15M</button>
+                        <button class="tf-btn active" data-tf="1h">1H</button>
+                        <button class="tf-btn" data-tf="4h">4H</button>
+                        <button class="tf-btn" data-tf="1d">1D</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Quick Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Price</span>
+                            <span class="stat-value" id="currentPrice">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Change</span>
+                            <span class="stat-value" id="priceChange">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Trend</span>
+                            <span class="stat-value" id="trendStatus">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Signal</span>
+                            <span class="stat-value" id="signalGrade">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Actions</h3>
+                    <button class="action-btn primary" id="analyzeBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        Analyze Market
+                    </button>
+                    <button class="action-btn secondary" id="backtestBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        Run Backtest
+                    </button>
+                    <button class="action-btn tertiary" id="liveNarrationBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+                        </svg>
+                        Live Narration
+                    </button>
+                </div>
+            </aside>
+
+            <section class="chart-section">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h2 id="chartSymbol">EUR/USD</h2>
+                        <span class="chart-timeframe" id="chartTimeframe">1 Hour</span>
+                    </div>
+                    <div class="chart-price">
+                        <span class="price-main" id="chartPrice">1.08500</span>
+                        <span class="price-change positive" id="chartChange">+0.0012 (+0.11%)</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div class="chart-indicators">
+                    <div class="indicator-card">
+                        <span class="indicator-name">RSI (14)</span>
+                        <span class="indicator-value" id="rsiValue">--</span>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" id="rsiFill" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    <div class="indicator-card">
+                        <span class="indicator-name">MACD</span>
+                        <span class="indicator-value" id="macdValue">--</span>
+                        <span class="indicator-signal" id="macdSignal">Neutral</span>
+                    </div>
+                    <div class="indicator-card">
+                        <span class="indicator-name">ADX</span>
+                        <span class="indicator-value" id="adxValue">--</span>
+                        <span class="indicator-signal" id="adxSignal">Weak</span>
+                    </div>
+                    <div class="indicator-card">
+                        <span class="indicator-name">ATR</span>
+                        <span class="indicator-value" id="atrValue">--</span>
+                        <span class="indicator-signal" id="atrSignal">Normal</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="analysis-section">
+                <div class="analysis-tabs">
+                    <button class="tab-btn active" data-tab="signals">Signals</button>
+                    <button class="tab-btn" data-tab="structure">Structure</button>
+                    <button class="tab-btn" data-tab="patterns">Patterns</button>
+                    <button class="tab-btn" data-tab="prediction">Prediction</button>
+                    <button class="tab-btn" data-tab="backtest">Backtest</button>
+                </div>
+
+                <div class="tab-content active" id="signals-tab">
+                    <div class="signals-container" id="signalsContainer">
+                        <div class="signal-card placeholder">
+                            <p>Click "Analyze Market" to generate trading signals</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="structure-tab">
+                    <div class="structure-container" id="structureContainer">
+                        <div class="structure-item">
+                            <h4>Market Structure</h4>
+                            <p id="marketStructure">--</p>
+                        </div>
+                        <div class="structure-item">
+                            <h4>Order Blocks</h4>
+                            <div id="orderBlocks" class="zones-list">--</div>
+                        </div>
+                        <div class="structure-item">
+                            <h4>Fair Value Gaps</h4>
+                            <div id="fvgZones" class="zones-list">--</div>
+                        </div>
+                        <div class="structure-item">
+                            <h4>Liquidity Zones</h4>
+                            <div id="liquidityZones" class="zones-list">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="patterns-tab">
+                    <div class="patterns-container" id="patternsContainer">
+                        <div class="pattern-card placeholder">
+                            <p>Patterns will appear after analysis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="prediction-tab">
+                    <div class="prediction-container" id="predictionContainer">
+                        <div class="prediction-scenarios">
+                            <div class="scenario bullish">
+                                <h4>Bullish Scenario</h4>
+                                <p class="probability" id="bullishProb">--</p>
+                                <p class="target" id="bullishTarget">Target: --</p>
+                            </div>
+                            <div class="scenario neutral">
+                                <h4>Neutral Scenario</h4>
+                                <p class="probability" id="neutralProb">--</p>
+                                <p class="target" id="neutralTarget">Range: --</p>
+                            </div>
+                            <div class="scenario bearish">
+                                <h4>Bearish Scenario</h4>
+                                <p class="probability" id="bearishProb">--</p>
+                                <p class="target" id="bearishTarget">Target: --</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="backtest-tab">
+                    <div class="backtest-container" id="backtestContainer">
+                        <div class="backtest-controls">
+                            <select id="strategySelect" class="select-input">
+                                <option value="smc_ict">SMC/ICT Strategy</option>
+                                <option value="liquidity_grab">Liquidity Grab</option>
+                                <option value="order_block">Order Block Trading</option>
+                                <option value="fvg_strategy">Fair Value Gap</option>
+                                <option value="breakout_retest">Breakout & Retest</option>
+                                <option value="mean_reversion">Mean Reversion</option>
+                                <option value="momentum">Momentum Strategy</option>
+                            </select>
+                            <input type="number" id="capitalInput" class="number-input" value="10000" placeholder="Initial Capital">
+                            <button class="action-btn primary" id="runBacktestBtn">Run 5x Backtest</button>
+                        </div>
+                        <div class="backtest-results" id="backtestResults">
+                            <div class="backtest-placeholder">
+                                <p>Run a backtest to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <aside class="right-panel">
+            <div class="panel-section">
+                <h3>Live Narration</h3>
+                <div class="narration-box" id="narrationBox">
+                    <p class="narration-placeholder">Click "Live Narration" to start real-time market commentary</p>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Recent Signals</h3>
+                <div class="signals-list" id="recentSignals">
+                    <div class="empty-state">No recent signals</div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Trade History</h3>
+                <div class="trades-list" id="tradeHistory">
+                    <div class="empty-state">No trades yet</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="modal" id="signalModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Signal Details</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
